@@ -1,0 +1,19 @@
+{
+  "name": "temple-ride",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A simple, accessible temple carpool organizer.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test",
+    "check": "node --check server.js && node --check lib/store.js && node --check lib/blob-backend.js && node --check public/app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.6.1"
+  }
+}

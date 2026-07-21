@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#173f35" />
+    <meta name="description" content="A simple way to share rides to the temple." />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <title>Temple Ride</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header">
+      <button class="brand" id="home-button" type="button" aria-label="Temple Ride home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 36 36"><path d="m18 3-9 9h3v12h12V12h3L18 3Z"/><path d="M15 24v-8h6v8"/></svg>
+        </span>
+        <span>Temple Ride</span>
+      </button>
+      <button class="text-button" id="admin-button" type="button">Admin</button>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+      <section id="member-view" class="view" aria-label="Current temple trip">
+        <div id="member-empty" class="empty-state" hidden>
+          <div class="empty-symbol" aria-hidden="true">✦</div>
+          <h1>No trip is posted yet</h1>
+          <p>An administrator can post the next temple trip.</p>
+          <button class="secondary-button" id="empty-admin-button" type="button">Go to Admin</button>
+        </div>
+
+        <div id="trip-content" hidden>
+          <header class="trip-summary">
+            <p class="eyebrow" id="trip-date"></p>
+            <h1 id="trip-temple"></h1>
+            <div class="session-time" aria-label="Temple session time">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span>
+                <small>Session time</small>
+                <strong id="trip-session"></strong>
+              </span>
+            </div>
+            <p class="trip-note" id="trip-note" hidden></p>
+          </header>
+
+          <section class="roster" aria-labelledby="rides-heading">
+            <div class="section-heading trip-group-heading">
+              <div>
+                <p class="step-label">Trip group</p>
+                <h2 id="rides-heading">Choose an open seat</h2>
+              </div>
+              <button class="add-car-button" id="drive-button" type="button" aria-expanded="false" aria-controls="driver-panel">
+                <span aria-hidden="true">＋</span>
+                Add my car
+              </button>
+            </div>
+
+            <div class="group-view-tabs" role="tablist" aria-label="Trip group view">
+              <button id="seats-view-button" type="button" role="tab" aria-selected="true" aria-controls="car-list">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 14v-3l2-5h10l2 5v3"/><path d="M4 14h16v4H4z"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></svg>
+                Seats
+              </button>
+              <button id="names-view-button" type="button" role="tab" aria-selected="false" aria-controls="car-list">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c0-3 2-5 5-5s5 2 5 5M14 15c3-1 6 1 6 4"/></svg>
+                Names
+              </button>
+            </div>
+
+            <div class="seat-legend" id="seat-legend" hidden>
+              <span><i class="legend-seat open" aria-hidden="true">＋</i> Tap an open seat</span>
+              <span><i class="legend-seat taken" aria-hidden="true"></i> Taken</span>
+            </div>
+
+            <div id="car-list" class="visual-car-list"></div>
+
+            <section class="flow-panel driver-panel" id="driver-panel" hidden aria-labelledby="driver-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="step-label">Offer a ride</p>
+                  <h2 id="driver-heading">Add your car</h2>
+                </div>
+                <button class="close-button" type="button" data-close-panel aria-label="Close driver form">×</button>
+              </div>
+              <form id="driver-form">
+                <label for="driver-name">Your name</label>
+                <input id="driver-name" name="name" autocomplete="name" maxlength="80" placeholder="Pat Smith" required />
+                <label for="driver-seats">Open passenger seats</label>
+                <select id="driver-seats" name="seats" required>
+                  <option value="1">1 seat</option>
+                  <option value="2">2 seats</option>
+                  <option value="3" selected>3 seats</option>
+                  <option value="4">4 seats</option>
+                  <option value="5">5 seats</option>
+                  <option value="6">6 seats</option>
+                  <option value="7">7 seats</option>
+                  <option value="8">8 seats</option>
+                </select>
+                <button class="primary-button submit-button" type="submit">Add my car</button>
+              </form>
+            </section>
+
+            <div id="waitlist-action" class="waitlist-action" hidden>
+              <div class="waitlist-icon" aria-hidden="true">?</div>
+              <div>
+                <strong>No open seats?</strong>
+                <span>Join the rider list.</span>
+              </div>
+              <button class="secondary-button" id="waitlist-button" type="button">I need a ride</button>
+            </div>
+
+            <div id="rider-list-section" class="rider-list-section" hidden>
+              <h3>Waiting for a seat</h3>
+              <ul id="rider-list"></ul>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="admin-login-view" class="view narrow-view" hidden aria-labelledby="admin-login-heading">
+        <button class="back-button" type="button" data-go-home>← Back to trip</button>
+        <p class="eyebrow">Administrator</p>
+        <h1 id="admin-login-heading">Enter the admin PIN</h1>
+        <form id="admin-login-form" class="admin-login-form">
+          <label for="admin-pin">4-digit PIN</label>
+          <input id="admin-pin" name="pin" inputmode="numeric" autocomplete="current-password" pattern="[0-9]*" maxlength="12" required />
+          <p class="form-help" id="admin-pin-help">Ask the trip organizer for the PIN.</p>
+          <button class="primary-button submit-button" type="submit">Open Admin</button>
+        </form>
+      </section>
+
+      <section id="admin-view" class="view" hidden aria-labelledby="admin-heading">
+        <div class="admin-topline">
+          <button class="back-button" type="button" data-go-home>← Back to trip</button>
+          <button class="text-button" id="admin-logout-button" type="button">Lock Admin</button>
+        </div>
+        <p class="eyebrow">Administrator</p>
+        <h1 id="admin-heading">Current trip</h1>
+        <p class="lead">Changes appear for everyone.</p>
+
+        <section class="admin-form-section" aria-labelledby="trip-form-heading">
+          <h2 id="trip-form-heading">Trip everyone sees</h2>
+          <form id="trip-form" class="trip-form">
+            <input type="hidden" id="edit-trip-id" name="tripId" />
+            <label for="admin-temple">Temple</label>
+            <input id="admin-temple" name="temple" maxlength="100" placeholder="Los Angeles Temple" required />
+            <div class="form-row">
+              <div>
+                <label for="admin-date">Date</label>
+                <input id="admin-date" name="date" type="date" required />
+              </div>
+              <div>
+                <label for="admin-session">Session time</label>
+                <input id="admin-session" name="sessionTime" type="time" required />
+              </div>
+            </div>
+            <label for="admin-notes">Note <span class="optional">optional</span></label>
+            <textarea id="admin-notes" name="notes" maxlength="240" rows="3" placeholder="Anything the group should know"></textarea>
+            <button class="primary-button submit-button" id="trip-submit" type="submit">Update trip</button>
+          </form>
+        </section>
+
+        <section class="admin-signups" aria-labelledby="signups-heading">
+          <div class="section-heading">
+            <h2 id="signups-heading">Current signups</h2>
+            <span id="signup-count" class="muted-count"></span>
+          </div>
+          <div id="admin-people-list"></div>
+          <button class="danger-button remove-trip-button" id="delete-trip-button" type="button" hidden>Remove current trip</button>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="rider-dialog" aria-labelledby="rider-dialog-heading">
+      <div class="dialog-heading">
+        <div>
+          <p class="step-label" id="rider-dialog-label">Open seat</p>
+          <h2 id="rider-dialog-heading">Take this seat</h2>
+        </div>
+        <button class="close-button" id="close-rider-dialog" type="button" aria-label="Close">×</button>
+      </div>
+      <form id="rider-form">
+        <input type="hidden" id="selected-driver-id" name="driverId" />
+        <label for="rider-name">Your name</label>
+        <input id="rider-name" name="name" autocomplete="name" maxlength="80" placeholder="Pat Smith" required />
+        <p class="form-help">Coordinate with the driver outside this app.</p>
+        <button class="primary-button submit-button" id="rider-submit" type="submit">Take this seat</button>
+      </form>
+    </dialog>
+
+    <dialog id="car-roster-dialog" aria-labelledby="car-roster-heading">
+      <div class="dialog-heading">
+        <div>
+          <p class="step-label">Car group</p>
+          <h2 id="car-roster-heading">Riders</h2>
+        </div>
+        <button class="close-button" id="close-car-roster" type="button" aria-label="Close car group">×</button>
+      </div>
+      <div id="car-roster-content"></div>
+      <button class="primary-button roster-join-button" id="roster-join-button" type="button" hidden>Join this car</button>
+    </dialog>
+
+    <div class="seat-name-popover" id="seat-name-popover" role="dialog" aria-label="Passenger name" hidden>
+      <span>
+        <small>Passenger</small>
+        <strong id="seat-name-text"></strong>
+      </span>
+      <button id="close-seat-name" type="button" aria-label="Close passenger name">×</button>
+    </div>
+
+    <footer>
+      <p>Names and ride choices only. Please coordinate details outside the app.</p>
+    </footer>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

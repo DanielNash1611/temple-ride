@@ -1,0 +1,4 @@
+data/app-data.json
+data/*.tmp
+coverage
+test-results
