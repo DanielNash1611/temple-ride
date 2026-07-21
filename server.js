@@ -68,7 +68,7 @@ async function serveStatic(requestPath, response) {
   }
 }
 
-export function createAppServer({
+export function createAppHandler({
   dataFile = process.env.TEMPLE_CARPOOL_DATA_FILE || DEFAULT_DATA_FILE,
   adminPin = process.env.TEMPLE_CARPOOL_ADMIN_PIN || "2468",
   blobToken = process.env.BLOB_READ_WRITE_TOKEN,
@@ -78,7 +78,7 @@ export function createAppServer({
   const store = new CarpoolStore(dataFile, { backend });
   const usesDemoPin = !process.env.TEMPLE_CARPOOL_ADMIN_PIN && adminPin === "2468";
 
-  return createServer(async (request, response) => {
+  return async (request, response) => {
     try {
       const url = new URL(request.url, "http://localhost");
       const segments = url.pathname.split("/").filter(Boolean);
@@ -139,8 +139,14 @@ export function createAppServer({
       if (status === 500) console.error(error);
       sendJson(response, status, { error: status === 500 ? "Something went wrong." : error.message });
     }
-  });
+  };
 }
+
+export function createAppServer(options = {}) {
+  return createServer(createAppHandler(options));
+}
+
+export default createAppHandler();
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const port = Number(process.env.PORT) || 3000;
