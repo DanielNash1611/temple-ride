@@ -7,7 +7,7 @@
     <meta name="description" content="A simple way to share rides to the temple." />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/styles.css?v=20260820" />
     <title>Temple Ride</title>
   </head>
   <body>
@@ -54,10 +54,15 @@
                 <p class="step-label">Trip group</p>
                 <h2 id="rides-heading">Choose an open seat</h2>
               </div>
-              <button class="add-car-button" id="drive-button" type="button" aria-expanded="false" aria-controls="driver-panel">
-                <span aria-hidden="true">＋</span>
-                Add my car
-              </button>
+              <div class="trip-group-actions">
+                <button class="join-any-car-button" id="join-any-car-button" type="button">
+                  Join any car
+                </button>
+                <button class="add-car-button" id="drive-button" type="button" aria-expanded="false" aria-controls="driver-panel">
+                  <span aria-hidden="true">＋</span>
+                  Add my car
+                </button>
+              </div>
             </div>
 
             <div class="group-view-tabs" role="tablist" aria-label="Trip group view">
@@ -100,6 +105,7 @@
                   <option value="7">7 seats</option>
                   <option value="8">8 seats</option>
                 </select>
+                <p class="privacy-note">Everyone with access can see names and ride assignments. Members of this trusted group can edit or remove roster entries without identity verification.</p>
                 <button class="primary-button submit-button" type="submit">Add my car</button>
               </form>
             </section>
@@ -172,6 +178,17 @@
           <div id="admin-people-list"></div>
           <button class="danger-button remove-trip-button" id="delete-trip-button" type="button" hidden>Remove current trip</button>
         </section>
+
+        <section class="admin-change-log" id="admin-change-log-section" aria-labelledby="change-log-heading" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="step-label">PIN protected</p>
+              <h2 id="change-log-heading">Current trip changes</h2>
+            </div>
+          </div>
+          <p class="form-help">Shows what changed, not the identity of an unauthenticated member.</p>
+          <ol id="admin-change-log-list" class="change-log-list"></ol>
+        </section>
       </section>
     </main>
 
@@ -185,9 +202,11 @@
       </div>
       <form id="rider-form">
         <input type="hidden" id="selected-driver-id" name="driverId" />
-        <label for="rider-name">Your name</label>
+        <input type="hidden" id="rider-assignment-mode" name="assignmentMode" />
+        <label for="rider-name">Your full name</label>
         <input id="rider-name" name="name" autocomplete="name" maxlength="80" placeholder="Pat Smith" required />
         <p class="form-help">Coordinate with the driver outside this app.</p>
+        <p class="privacy-note">Everyone with access can see names and ride assignments. Members of this trusted group can edit or remove roster entries without identity verification.</p>
         <button class="primary-button submit-button" id="rider-submit" type="submit">Take this seat</button>
       </form>
     </dialog>
@@ -202,20 +221,101 @@
       </div>
       <div id="car-roster-content"></div>
       <button class="primary-button roster-join-button" id="roster-join-button" type="button" hidden>Join this car</button>
+      <button class="danger-button roster-remove-car-button" id="roster-remove-car-button" type="button">Remove this car</button>
     </dialog>
 
-    <div class="seat-name-popover" id="seat-name-popover" role="dialog" aria-label="Passenger name" hidden>
-      <span>
-        <small>Passenger</small>
-        <strong id="seat-name-text"></strong>
-      </span>
-      <button id="close-seat-name" type="button" aria-label="Close passenger name">×</button>
-    </div>
+    <dialog id="edit-person-dialog" aria-labelledby="edit-person-heading">
+      <div class="dialog-heading">
+        <div>
+          <p class="step-label">Update the roster</p>
+          <h2 id="edit-person-heading">Edit signup</h2>
+        </div>
+        <button class="close-button" id="close-edit-person" type="button" aria-label="Close edit signup">×</button>
+      </div>
+      <form id="edit-person-form">
+        <input type="hidden" id="edit-person-id" name="personId" />
+        <input type="hidden" id="edit-person-type" name="personType" />
+        <div id="edit-person-name-field">
+          <label for="edit-person-name">Display name</label>
+          <input id="edit-person-name" name="name" autocomplete="name" maxlength="80" required />
+        </div>
+        <div id="edit-driver-seats-field" hidden>
+          <label for="edit-driver-seats">Total passenger seats offered</label>
+          <select id="edit-driver-seats" name="seats">
+            <option value="1">1 seat</option>
+            <option value="2">2 seats</option>
+            <option value="3">3 seats</option>
+            <option value="4">4 seats</option>
+            <option value="5">5 seats</option>
+            <option value="6">6 seats</option>
+            <option value="7">7 seats</option>
+            <option value="8">8 seats</option>
+          </select>
+        </div>
+        <div id="edit-rider-current" class="current-ride-summary" hidden></div>
+        <button class="secondary-button change-car-button" id="edit-rider-change-button" type="button" hidden>Change cars</button>
+        <fieldset id="edit-rider-destination-field" hidden>
+          <legend>Choose a new ride</legend>
+          <div id="edit-rider-destinations"></div>
+        </fieldset>
+        <div id="edit-person-confirmation-section" class="management-confirmation" hidden>
+          <label for="edit-person-confirmation">Type <strong id="edit-person-confirmation-name"></strong> to make changes</label>
+          <input id="edit-person-confirmation" name="confirmationName" autocomplete="off" autocapitalize="words" maxlength="80" />
+          <p class="form-help">The action buttons stay unavailable until the name matches.</p>
+        </div>
+        <p class="privacy-note">Everyone with access can see names and ride assignments. Members of this trusted group can edit or remove roster entries without identity verification.</p>
+        <div class="management-actions">
+          <button class="primary-button submit-button" id="edit-person-submit" type="submit">Save changes</button>
+          <button class="danger-button" id="edit-person-remove-start" type="button" hidden>Remove from trip</button>
+          <button class="danger-confirm-button" id="edit-person-remove" type="button" hidden>Remove from trip</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="remove-person-dialog" aria-labelledby="remove-person-heading" aria-describedby="remove-person-description remove-person-help">
+      <div class="dialog-heading">
+        <div>
+          <p class="step-label">Confirm removal</p>
+          <h2 id="remove-person-heading">Remove this signup?</h2>
+        </div>
+        <button class="close-button" id="close-remove-person" type="button" aria-label="Cancel removal">×</button>
+      </div>
+      <p id="remove-person-description"></p>
+      <form id="remove-person-form">
+        <label for="remove-person-confirmation">Type <strong id="remove-person-confirmation-name"></strong> to confirm</label>
+        <input id="remove-person-confirmation" name="confirmationName" autocomplete="off" autocapitalize="words" maxlength="80" required />
+        <p class="form-help" id="remove-person-help">The Remove button stays unavailable until the name matches.</p>
+        <div class="dialog-actions">
+          <button class="secondary-button" id="cancel-remove-person" type="button">Keep signup</button>
+          <button class="danger-confirm-button" id="confirm-remove-person" type="submit" disabled>Remove</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="name-match-dialog" aria-labelledby="name-match-heading" aria-describedby="name-match-intro">
+      <div class="dialog-heading">
+        <div>
+          <p class="step-label">Check this name</p>
+          <h2 id="name-match-heading">Possible matching signup</h2>
+        </div>
+        <button class="close-button" id="close-name-match" type="button" aria-label="Cancel signup">×</button>
+      </div>
+      <p id="name-match-intro">Review the current roster before continuing.</p>
+      <ul id="name-match-list" class="name-match-list"></ul>
+      <div id="name-match-car-options" class="name-match-car-options" hidden>
+        <p><strong>Would you rather join their car?</strong></p>
+        <div id="name-match-car-buttons"></div>
+      </div>
+      <div class="dialog-actions stacked-dialog-actions">
+        <button class="primary-button" id="continue-name-match" type="button">Continue as planned</button>
+        <button class="secondary-button" id="cancel-name-match" type="button">Cancel</button>
+      </div>
+    </dialog>
 
     <footer>
-      <p>Names and ride choices only. Please coordinate details outside the app.</p>
+      <p>Names and ride choices only. Everyone with access can see the shared roster, and members of this trusted group can correct or remove entries.</p>
     </footer>
 
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="/app.js?v=20260820"></script>
   </body>
 </html>

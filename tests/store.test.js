@@ -5,10 +5,10 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { CarpoolStore, StoreError, getOpenSeats } from "../lib/store.js";
 
-async function withStore(run) {
+async function withStore(run, storeOptions) {
   const directory = await mkdtemp(join(tmpdir(), "temple-ride-test-"));
   try {
-    return await run(new CarpoolStore(join(directory, "state.json")));
+    return await run(new CarpoolStore(join(directory, "state.json"), storeOptions));
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -67,12 +67,56 @@ test("adds unassigned riders to the rider list", () => withStore(async (store) =
   assert.equal(savedTrip.waitlist[0].name, "Morgan Lane");
 }));
 
+test("assigns Join any car across currently open passenger seats", () => {
+  const randomValues = [0, 0.75];
+  return withStore(async (store) => {
+    const trip = await setCurrentTrip(store);
+    const firstDriver = await store.addDriver(trip.id, { name: "Avery North", seats: 2 });
+    const secondDriver = await store.addDriver(trip.id, { name: "Blair South", seats: 2 });
+
+    const firstRider = await store.addRider(trip.id, { name: "Casey East", assignmentMode: "any" });
+    const secondRider = await store.addRider(trip.id, { name: "Devon West", assignmentMode: "any" });
+    assert.equal(firstRider.driverName, firstDriver.name);
+    assert.equal(secondRider.driverName, secondDriver.name);
+
+    await store.addRider(trip.id, { name: "Emery Lake", driverId: firstDriver.id });
+    await store.addRider(trip.id, { name: "Finley Hill", driverId: secondDriver.id });
+    await assert.rejects(
+      store.addRider(trip.id, { name: "No Seat Rider", assignmentMode: "any" }),
+      /There are no open seats right now/
+    );
+  }, { random: () => randomValues.shift() ?? 0 });
+});
+
+test("moves a waitlisted rider with confirmed Join any car", () => withStore(async (store) => {
+  const trip = await setCurrentTrip(store);
+  const driver = await store.addDriver(trip.id, { name: "Open Driver", seats: 1 });
+  const rider = await store.addRider(trip.id, { name: "Waiting Rider" });
+
+  await assert.rejects(
+    store.updatePerson(trip.id, rider.id, {
+      name: rider.name,
+      assignmentMode: "any",
+      confirmationName: "Wrong Rider"
+    }),
+    /Type Waiting Rider to confirm this change/
+  );
+
+  const moved = await store.updatePerson(trip.id, rider.id, {
+    name: rider.name,
+    assignmentMode: "any",
+    confirmationName: " waiting   rider "
+  });
+  assert.equal(moved.driverName, driver.name);
+  assert.equal(moved.placement, "car");
+}));
+
 test("moves a driver's riders to the rider list when an admin removes the driver", () => withStore(async (store) => {
   const trip = await setCurrentTrip(store);
   const driver = await store.addDriver(trip.id, { name: "Sam Driver", seats: 1 });
   await store.addRider(trip.id, { name: "Alex Rider", driverId: driver.id });
 
-  const result = await store.removePerson(trip.id, driver.id);
+  const result = await store.removePerson(trip.id, driver.id, { confirmationName: "  sam   driver " });
   assert.equal(result.movedToWaitlist, 1);
 
   const state = await store.read();
@@ -85,4 +129,136 @@ test("rejects invalid names and seat counts", () => withStore(async (store) => {
   const trip = await setCurrentTrip(store);
   await assert.rejects(store.addDriver(trip.id, { name: "", seats: 3 }), /Name is required/);
   await assert.rejects(store.addDriver(trip.id, { name: "Pat", seats: 12 }), /between 1 and 8/);
+  await assert.rejects(store.updateTrip(trip.id, { ...tripInput, date: "2026-02-31" }), /valid trip date/);
+}));
+
+test("requires explicit confirmation for exact-name and possible-family matches", () => withStore(async (store) => {
+  const trip = await setCurrentTrip(store);
+  const driver = await store.addDriver(trip.id, { name: "Pat Smith", seats: 2 });
+
+  await assert.rejects(
+    store.addRider(trip.id, { name: "Alex Smith" }),
+    (error) => {
+      assert.equal(error.details.code, "NAME_MATCH_CONFIRMATION_REQUIRED");
+      assert.deepEqual(error.details.matches.map((match) => ({
+        name: match.name,
+        matchType: match.matchType,
+        placement: match.placement,
+        driverName: match.driverName
+      })), [{ name: "Pat Smith", matchType: "family", placement: "driver", driverName: "Pat Smith" }]);
+      assert.deepEqual(error.details.eligibleCars, [{ id: driver.id, name: "Pat Smith", openSeats: 2 }]);
+      return true;
+    }
+  );
+
+  const rider = await store.addRider(trip.id, {
+    name: "  Alex   Smith ",
+    confirmedMatchIds: [driver.id]
+  });
+  assert.equal(rider.name, "Alex Smith");
+
+  await assert.rejects(
+    store.addRider(trip.id, { name: "pat smith", driverId: driver.id }),
+    (error) => {
+      assert.equal(error.details.matches.find((match) => match.id === driver.id).matchType, "exact");
+      assert.equal(error.details.matches.find((match) => match.id === rider.id).matchType, "family");
+      return true;
+    }
+  );
+
+  const secondDriver = await store.addDriver(trip.id, {
+    name: "Jordan Smith",
+    seats: 1,
+    confirmedMatchIds: [driver.id, rider.id]
+  });
+  await assert.rejects(
+    store.addRider(trip.id, { name: "Casey Smith" }),
+    (error) => {
+      assert.deepEqual(error.details.matches.map((match) => match.name), ["Pat Smith", "Jordan Smith", "Alex Smith"]);
+      assert.deepEqual(error.details.eligibleCars.map((car) => car.id), [driver.id, secondDriver.id]);
+      return true;
+    }
+  );
+}));
+
+test("lets members edit drivers and move riders while rechecking capacity", () => withStore(async (store) => {
+  const trip = await setCurrentTrip(store);
+  const firstDriver = await store.addDriver(trip.id, { name: "First Driver", seats: 2 });
+  const rider = await store.addRider(trip.id, { name: "Moving Passenger", driverId: firstDriver.id });
+  await store.addRider(trip.id, { name: "Staying Traveler", driverId: firstDriver.id });
+
+  await assert.rejects(
+    store.updatePerson(trip.id, firstDriver.id, { name: "First Driver", seats: 1 }),
+    /already has 2 riders/
+  );
+
+  const secondDriver = await store.addDriver(trip.id, { name: "Second Motorist", seats: 1 });
+  await store.addRider(trip.id, { name: "Full Car Occupant", driverId: secondDriver.id });
+  await assert.rejects(
+    store.updatePerson(trip.id, rider.id, {
+      name: "Moving Passenger",
+      driverId: secondDriver.id,
+      confirmationName: "Moving Passenger"
+    }),
+    /just filled up/
+  );
+
+  await assert.rejects(
+    store.updatePerson(trip.id, rider.id, {
+      name: "Moving Passenger",
+      driverId: "",
+      confirmationName: "Wrong Passenger"
+    }),
+    /Type Moving Passenger to confirm this change/
+  );
+
+  const moved = await store.updatePerson(trip.id, rider.id, {
+    name: "Renamed Rider",
+    driverId: "",
+    confirmationName: "  moving   passenger "
+  });
+  assert.equal(moved.placement, "waitlist");
+  const editedDriver = await store.updatePerson(trip.id, firstDriver.id, { name: "Renamed Driver", seats: 1 });
+  assert.equal(editedDriver.name, "Renamed Driver");
+  assert.equal(editedDriver.seats, 1);
+}));
+
+test("requires the current display name before removing a roster entry", () => withStore(async (store) => {
+  const trip = await setCurrentTrip(store);
+  const rider = await store.addRider(trip.id, { name: "Careful Rider" });
+
+  await assert.rejects(
+    store.removePerson(trip.id, rider.id, { confirmationName: "Wrong Rider" }),
+    /Type Careful Rider to confirm removal/
+  );
+
+  const stateAfterMismatch = await store.read();
+  assert.equal(stateAfterMismatch.trips[0].waitlist[0].name, "Careful Rider");
+
+  await store.removePerson(trip.id, rider.id, { confirmationName: "careful rider" });
+  const stateAfterConfirmation = await store.read();
+  assert.equal(stateAfterConfirmation.trips[0].waitlist.length, 0);
+}));
+
+test("records current-trip changes without claiming a member identity", () => withStore(async (store) => {
+  const trip = await setCurrentTrip(store);
+  const driver = await store.addDriver(trip.id, { name: "Log Driver", seats: 1 });
+  const rider = await store.addRider(trip.id, { name: "Log Rider", driverId: driver.id });
+  await store.updatePerson(trip.id, rider.id, {
+    name: "Updated Rider",
+    driverId: "",
+    confirmationName: "Log Rider"
+  });
+  await store.removePerson(trip.id, rider.id, { confirmationName: "Updated Rider" });
+
+  const log = await store.readChangeLog(trip.id);
+  assert.deepEqual(log.slice(0, 4).map((entry) => entry.type), [
+    "rider_removed",
+    "rider_moved",
+    "rider_added",
+    "driver_added"
+  ]);
+  assert.equal(log[0].actor, "member");
+  assert.equal("ipAddress" in log[0], false);
+  assert.equal("userId" in log[0], false);
 }));

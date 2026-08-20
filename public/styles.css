@@ -275,6 +275,15 @@ input:focus, select:focus, textarea:focus { border-color: var(--forest); box-sha
 .panel-heading h2, .section-heading h2, .section-heading p { margin-bottom: 0; }
 form > label:not(:first-of-type), form > fieldset, form > .form-row { margin-top: 1.2rem; }
 .form-help { margin: 0.65rem 0 0; color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+.privacy-note {
+  margin: 1rem 0 0;
+  padding: 0.75rem 0.85rem;
+  border-left: 3px solid var(--gold);
+  color: #4c5852;
+  background: #f3eee2;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
 .submit-button { width: 100%; margin-top: 1.25rem; }
 
 fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
@@ -315,13 +324,40 @@ fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
 
 .rider-list-section { margin-top: 1.3rem; padding: 1.25rem; border-radius: 14px; background: #efe9dc; }
 .rider-list-section h3 { margin-bottom: 0.65rem; color: #594b34; }
-.rider-list-section ul { display: flex; flex-wrap: wrap; gap: 0.45rem 1rem; margin: 0; padding-left: 1.2rem; }
+.rider-list-section ul { margin: 0; padding: 0; list-style: none; }
 .rider-list-section li { color: #4a463e; }
+
+.member-person-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 52px;
+  border-top: 1px solid rgba(89, 75, 52, 0.16);
+}
+.member-person-row:first-child { border-top: 0; }
+.member-person-name { flex: 1 1 auto; min-width: 0; }
+.member-person-actions { display: inline-flex; flex: 0 0 auto; gap: 0.1rem; }
+.member-person-actions button {
+  min-height: 44px;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  color: var(--forest);
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 0.15rem;
+}
+.member-person-actions button:last-child { color: var(--danger); }
+.driver-member-actions { justify-content: flex-end; padding: 0.25rem 0 0.45rem; border-bottom: 1px solid var(--line); }
 
 .trip-group-heading { align-items: flex-end; }
 .trip-group-heading h2 { max-width: 12ch; }
+.trip-group-actions { display: flex; align-items: stretch; gap: 0.55rem; }
 
-.add-car-button {
+.add-car-button,
+.join-any-car-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -337,6 +373,13 @@ fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
 }
 
 .add-car-button span { font-size: 1.3rem; line-height: 1; }
+.join-any-car-button {
+  border: 2px solid var(--forest);
+  color: var(--forest);
+  background: transparent;
+}
+.join-any-car-button:hover { background: var(--soft-green); }
+.join-any-car-button:disabled { border-color: #b8beb9; color: #7a817d; background: #ecece7; cursor: not-allowed; }
 
 .group-view-tabs {
   display: grid;
@@ -700,6 +743,13 @@ button.car-seat.taken:focus-visible {
 .admin-empty { color: var(--muted); line-height: 1.5; }
 .remove-trip-button { margin-top: 1.5rem; }
 
+.admin-change-log { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+.change-log-list { margin: 1rem 0 0; padding: 0; list-style: none; }
+.change-log-list li { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+.change-log-list strong { display: block; margin-top: 0.25rem; }
+.change-log-list p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
+.change-log-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; color: var(--muted); font-size: 0.72rem; font-weight: 750; }
+
 dialog {
   width: min(calc(100% - 2rem), 500px);
   max-height: calc(100dvh - 2rem);
@@ -714,6 +764,45 @@ dialog {
 dialog::backdrop { background: rgba(17, 35, 29, 0.55); backdrop-filter: blur(2px); }
 .dialog-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .dialog-heading h2 { margin-bottom: 1rem; }
+.dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-top: 1.25rem; }
+.stacked-dialog-actions { grid-template-columns: 1fr; }
+.danger-confirm-button {
+  min-height: 54px;
+  padding: 0.8rem 1rem;
+  border: 2px solid var(--danger);
+  border-radius: 12px;
+  color: white;
+  background: var(--danger);
+  font-weight: 850;
+}
+.danger-confirm-button:disabled {
+  border-color: #c8c2b8;
+  color: #6f6b65;
+  background: #e5e1da;
+  cursor: not-allowed;
+}
+#remove-person-form { margin-top: 1.15rem; }
+.management-confirmation { margin-top: 1.2rem; padding-top: 1.1rem; border-top: 1px solid var(--line); }
+.management-actions { display: grid; gap: 0.55rem; }
+.management-actions .danger-confirm-button { width: 100%; }
+.current-ride-summary {
+  margin-top: 0.35rem;
+  padding: 0.85rem 0;
+  color: var(--muted);
+  font-weight: 750;
+}
+.change-car-button { width: 100%; }
+#edit-driver-seats-field,
+#edit-rider-destination-field { margin-top: 1.2rem; }
+
+.name-match-list { margin: 1rem 0 0; padding: 0; list-style: none; }
+.name-match-list li { display: grid; gap: 0.2rem; padding: 0.75rem 0; border-top: 1px solid var(--line); }
+.name-match-list li > span:last-child { color: var(--muted); font-size: 0.86rem; }
+.match-kind { width: fit-content; padding: 0.15rem 0.45rem; border-radius: 999px; color: #644f1f; background: #f2e5c3; font-size: 0.7rem; font-weight: 800; }
+.name-match-car-options { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.name-match-car-options p { margin-bottom: 0.55rem; }
+.name-match-car-buttons { display: grid; gap: 0.55rem; }
+.name-match-car-buttons button { width: 100%; text-align: left; }
 
 .roster-driver {
   display: flex;
@@ -730,29 +819,7 @@ dialog::backdrop { background: rgba(17, 35, 29, 0.55); backdrop-filter: blur(2px
 .roster-rider-list li { display: flex; align-items: center; gap: 0.7rem; min-height: 58px; border-bottom: 1px solid var(--line); }
 .roster-seat-status { margin: 1rem 0 0; color: var(--muted); font-weight: 750; }
 .roster-join-button { width: 100%; margin-top: 1rem; }
-
-.seat-name-popover {
-  position: fixed;
-  z-index: 40;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  width: max-content;
-  min-width: 190px;
-  max-width: calc(100vw - 24px);
-  padding: 0.65rem 0.65rem 0.65rem 0.8rem;
-  border-radius: 13px;
-  color: white;
-  background: var(--ink);
-  box-shadow: 0 14px 35px rgba(0,0,0,0.25);
-  animation: popup-in 140ms ease-out both;
-}
-.seat-name-popover small,
-.seat-name-popover strong { display: block; }
-.seat-name-popover small { margin-bottom: 0.1rem; color: #b9c8c1; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
-.seat-name-popover strong { overflow-wrap: anywhere; }
-.seat-name-popover button { flex: 0 0 auto; width: 44px; height: 44px; border: 0; border-radius: 50%; color: white; background: rgba(255,255,255,0.12); font-size: 1.35rem; }
+.roster-remove-car-button { width: 100%; margin-top: 0.35rem; }
 
 @keyframes popup-in {
   from { opacity: 0; transform: translateY(5px) scale(0.97); }
@@ -832,9 +899,10 @@ footer { width: min(100% - 2rem, 760px); margin: 2rem auto 0; padding: 1.5rem 0 
   .decision-buttons, .form-row { grid-template-columns: 1fr; }
   .choice-button { min-height: 82px; }
   .admin-form-section { margin-right: -0.35rem; margin-left: -0.35rem; padding: 1.2rem; }
-  .trip-group-heading { align-items: center; }
+  .trip-group-heading { align-items: stretch; flex-direction: column; }
   .trip-group-heading h2 { font-size: 1.55rem; }
-  .add-car-button { min-width: 112px; }
+  .trip-group-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .add-car-button, .join-any-car-button { min-width: 0; }
   .visual-car-list { grid-template-columns: 1fr; }
   .waitlist-action { grid-template-columns: auto 1fr; }
   .waitlist-action .secondary-button { grid-column: 1 / -1; width: 100%; }

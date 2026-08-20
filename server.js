@@ -25,11 +25,20 @@ function sendJson(response, status, payload) {
   response.end(JSON.stringify(payload));
 }
 
+function memberState(state) {
+  return {
+    ...state,
+    trips: state.trips.map(({ changeLog, ...trip }) => trip)
+  };
+}
+
 async function readJson(request) {
   let body = "";
+  let bodyBytes = 0;
   for await (const chunk of request) {
+    bodyBytes += Buffer.byteLength(chunk);
+    if (bodyBytes > 20_000) throw new StoreError("Request is too large.", 413);
     body += chunk;
-    if (body.length > 20_000) throw new StoreError("Request is too large.", 413);
   }
   try {
     return body ? JSON.parse(body) : {};
@@ -56,9 +65,10 @@ async function serveStatic(requestPath, response) {
     const fileStats = await stat(filePath);
     if (!fileStats.isFile()) throw new Error("Not a file");
     const contents = await readFile(filePath);
+    const extension = extname(filePath);
     response.writeHead(200, {
-      "Content-Type": MIME_TYPES[extname(filePath)] ?? "application/octet-stream",
-      "Cache-Control": extname(filePath) === ".html" ? "no-cache" : "public, max-age=3600",
+      "Content-Type": MIME_TYPES[extension] ?? "application/octet-stream",
+      "Cache-Control": [".html", ".css", ".js"].includes(extension) ? "no-cache" : "public, max-age=3600",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "no-referrer"
     });
@@ -84,7 +94,7 @@ export function createAppHandler({
       const segments = url.pathname.split("/").filter(Boolean);
 
       if (request.method === "GET" && url.pathname === "/api/state") {
-        return sendJson(response, 200, await store.read());
+        return sendJson(response, 200, memberState(await store.read()));
       }
 
       if (request.method === "GET" && url.pathname === "/api/config") {
@@ -105,6 +115,11 @@ export function createAppHandler({
       if (segments[0] === "api" && segments[1] === "trips" && segments[2]) {
         const tripId = segments[2];
 
+        if (request.method === "GET" && segments[3] === "change-log" && segments.length === 4) {
+          requireAdmin(request, adminPin);
+          return sendJson(response, 200, { entries: await store.readChangeLog(tripId) });
+        }
+
         if (request.method === "PATCH" && segments.length === 3) {
           requireAdmin(request, adminPin);
           return sendJson(response, 200, await store.updateTrip(tripId, await readJson(request)));
@@ -116,16 +131,37 @@ export function createAppHandler({
         }
 
         if (request.method === "POST" && segments[3] === "drivers") {
-          return sendJson(response, 201, await store.addDriver(tripId, await readJson(request)));
+          return sendJson(response, 201, await store.addDriver(
+            tripId,
+            await readJson(request),
+            { actor: isAdmin(request, adminPin) ? "administrator" : "member" }
+          ));
         }
 
         if (request.method === "POST" && segments[3] === "riders") {
-          return sendJson(response, 201, await store.addRider(tripId, await readJson(request)));
+          return sendJson(response, 201, await store.addRider(
+            tripId,
+            await readJson(request),
+            { actor: isAdmin(request, adminPin) ? "administrator" : "member" }
+          ));
         }
 
-        if (request.method === "DELETE" && segments[3] === "people" && segments[4]) {
-          requireAdmin(request, adminPin);
-          return sendJson(response, 200, await store.removePerson(tripId, segments[4]));
+        if (request.method === "PATCH" && segments[3] === "people" && segments[4] && segments.length === 5) {
+          return sendJson(response, 200, await store.updatePerson(
+            tripId,
+            segments[4],
+            await readJson(request),
+            { actor: isAdmin(request, adminPin) ? "administrator" : "member" }
+          ));
+        }
+
+        if (request.method === "DELETE" && segments[3] === "people" && segments[4] && segments.length === 5) {
+          return sendJson(response, 200, await store.removePerson(
+            tripId,
+            segments[4],
+            await readJson(request),
+            { actor: isAdmin(request, adminPin) ? "administrator" : "member" }
+          ));
         }
       }
 
@@ -137,7 +173,10 @@ export function createAppHandler({
     } catch (error) {
       const status = error instanceof StoreError ? error.status : 500;
       if (status === 500) console.error(error);
-      sendJson(response, status, { error: status === 500 ? "Something went wrong." : error.message });
+      sendJson(response, status, {
+        error: status === 500 ? "Something went wrong." : error.message,
+        ...(error instanceof StoreError ? error.details : {})
+      });
     }
   };
 }
