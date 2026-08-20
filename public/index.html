@@ -6,8 +6,9 @@
     <meta name="theme-color" content="#173f35" />
     <meta name="description" content="A simple way to share rides to the temple." />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/styles.css?v=20260820" />
+    <link rel="icon" href="/assets/temple-ride-mark.png" type="image/png" />
+    <link rel="preload" href="/assets/los-angeles-temple-approach.jpg" as="image" fetchpriority="high" />
+    <link rel="stylesheet" href="/styles.css?v=20260820-temple" />
     <title>Temple Ride</title>
   </head>
   <body>
@@ -16,7 +17,7 @@
     <header class="site-header">
       <button class="brand" id="home-button" type="button" aria-label="Temple Ride home">
         <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 36 36"><path d="m18 3-9 9h3v12h12V12h3L18 3Z"/><path d="M15 24v-8h6v8"/></svg>
+          <img src="/assets/temple-ride-mark.png" alt="" width="48" height="48" />
         </span>
         <span>Temple Ride</span>
       </button>

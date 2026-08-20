@@ -24,9 +24,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 85% -5%, rgba(200, 149, 47, 0.13), transparent 24rem),
-    var(--paper);
+  background: var(--paper);
 }
 
 button, input, select, textarea { font: inherit; }
@@ -55,14 +53,14 @@ button:disabled { cursor: wait; opacity: 0.65; }
   align-items: center;
   justify-content: space-between;
   width: min(100% - 2rem, 760px);
-  min-height: 76px;
+  min-height: 84px;
   margin: 0 auto;
   border-bottom: 1px solid rgba(23, 35, 31, 0.13);
 }
 
 .brand {
   display: inline-flex;
-  gap: 0.6rem;
+  gap: 0.7rem;
   align-items: center;
   min-height: 52px;
   padding: 0;
@@ -70,20 +68,26 @@ button:disabled { cursor: wait; opacity: 0.65; }
   color: var(--forest);
   background: transparent;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   font-weight: 700;
 }
 
 .brand-mark {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
+  display: block;
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
   border-radius: 50%;
-  background: var(--forest);
+  background: var(--paper);
 }
 
-.brand-mark svg { width: 23px; fill: #fffdf8; stroke: #fffdf8; stroke-width: 1.5; }
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
 .text-button, .back-button, .close-button {
   min-width: 48px;
@@ -105,7 +109,7 @@ main {
   margin: 0 auto;
 }
 
-.view { padding: 2rem 0 1rem; animation: view-in 240ms ease-out both; }
+.view { padding: 1.25rem 0 1rem; animation: view-in 240ms ease-out both; }
 .narrow-view { width: min(100%, 520px); margin: 0 auto; padding-top: 3rem; }
 
 @keyframes view-in {
@@ -151,33 +155,52 @@ input:focus, select:focus, textarea:focus { border-color: var(--forest); box-sha
 
 .trip-summary {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.25rem 1rem;
-  align-items: center;
-  padding: 1rem 0 1.15rem;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  min-height: 300px;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-top: 1px solid rgba(23, 63, 53, 0.1);
+  border-bottom: 1px solid rgba(23, 63, 53, 0.12);
+  background-color: #efe9da;
+  background-image: url('/assets/los-angeles-temple-approach.jpg');
+  background-position: center 47%;
+  background-size: 130% auto;
+  animation: hero-settle 650ms ease-out both;
 }
 
-.trip-summary .eyebrow { grid-column: 1; margin-bottom: 0.15rem; }
-.trip-summary h1 {
-  grid-column: 1;
+.trip-summary .eyebrow {
+  position: absolute;
+  top: 27%;
+  left: 4%;
   margin: 0;
-  font-size: clamp(1.8rem, 5.2vw, 2.85rem);
+  text-shadow: 0 1px 8px rgba(255, 253, 248, 0.86);
+}
+.trip-summary h1 {
+  position: absolute;
+  top: 36%;
+  left: 4%;
+  max-width: 52%;
+  margin: 0;
+  font-size: clamp(2rem, 5.8vw, 3.15rem);
+  text-wrap: balance;
+  text-shadow: 0 2px 16px rgba(255, 253, 248, 0.82);
 }
 
 .session-time {
-  grid-column: 2;
-  grid-row: 1 / 3;
+  position: absolute;
+  z-index: 1;
+  right: 4%;
+  bottom: 23%;
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
   margin: 0;
-  padding: 0.6rem 0.8rem;
-  border-radius: 14px;
+  padding: 0.68rem 0.9rem;
+  border: 1px solid rgba(23, 63, 53, 0.08);
+  border-radius: 18px;
   color: var(--forest);
-  background: var(--soft-green);
+  background: rgba(249, 250, 246, 0.88);
+  box-shadow: 0 12px 30px rgba(23, 63, 53, 0.08);
+  backdrop-filter: blur(8px);
 }
 
 .session-time svg {
@@ -207,14 +230,25 @@ input:focus, select:focus, textarea:focus { border-color: var(--forest); box-sha
 .trip-details dd { margin: 0; overflow-wrap: anywhere; font-weight: 750; line-height: 1.3; }
 
 .trip-note {
-  grid-column: 1 / -1;
-  margin: 0.65rem 0 0;
-  padding: 0.6rem 0.8rem;
+  position: absolute;
+  z-index: 1;
+  right: 4%;
+  bottom: 3.5%;
+  left: 4%;
+  margin: 0;
+  padding: 0.62rem 0.8rem;
   border-left: 3px solid var(--gold);
   color: #49534e;
-  background: rgba(255,255,255,0.45);
+  background: rgba(255, 253, 248, 0.88);
   font-size: 0.88rem;
   line-height: 1.35;
+  box-shadow: 0 10px 28px rgba(23, 63, 53, 0.06);
+  backdrop-filter: blur(7px);
+}
+
+@keyframes hero-settle {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .decision { padding: 2rem 0; }
@@ -307,7 +341,7 @@ fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
 
 .waitlist-message { display: flex; flex-direction: column; gap: 0.25rem; margin-top: 1.2rem; padding: 1rem; border-radius: 12px; background: var(--soft-green); }
 
-.roster { padding: 1.3rem 0 2rem; }
+.roster { padding: 1.75rem 0 2rem; }
 .seat-count, .muted-count { color: var(--muted); font-size: 0.86rem; font-weight: 700; }
 .car-list { margin-top: 1.2rem; }
 .car-row { padding: 1.2rem 0; border-top: 1px solid var(--line); }
@@ -366,7 +400,7 @@ fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
   min-height: 52px;
   padding: 0.6rem 0.8rem;
   border: 0;
-  border-radius: 12px;
+  border-radius: 14px;
   color: white;
   background: var(--forest);
   font-weight: 800;
@@ -387,8 +421,8 @@ fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
   gap: 4px;
   margin-top: 1.15rem;
   padding: 4px;
-  border-radius: 14px;
-  background: #e5e6df;
+  border-radius: 16px;
+  background: #e7e7e0;
 }
 
 .group-view-tabs button {
@@ -399,7 +433,7 @@ fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
   min-height: 48px;
   padding: 0.6rem 0.8rem;
   border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--muted);
   background: transparent;
   font-weight: 800;
@@ -449,7 +483,7 @@ fieldset { margin-left: 0; margin-right: 0; padding: 0; border: 0; }
   padding: 1rem;
   border: 1px solid #d1d7d1;
   border-radius: 22px;
-  background: rgba(255, 253, 248, 0.85);
+  background: rgba(255, 253, 248, 0.94);
   box-shadow: 0 12px 30px rgba(33, 48, 42, 0.08);
 }
 
@@ -886,14 +920,16 @@ footer { width: min(100% - 2rem, 760px); margin: 2rem auto 0; padding: 1.5rem 0 
 @media (max-width: 560px) {
   :root { font-size: 17px; }
   .view { padding-top: 1.4rem; }
-  #member-view.view { padding-top: 0.9rem; }
-  .trip-summary { gap: 0.2rem 0.65rem; padding: 0.8rem 0 0.9rem; }
-  .trip-summary h1 { font-size: clamp(1.7rem, 8vw, 2.15rem); }
-  .session-time { gap: 0.4rem; padding: 0.5rem 0.65rem; }
+  #member-view.view { padding-top: 0; }
+  #trip-content { margin-right: -1rem; margin-left: -1rem; }
+  .trip-summary { min-height: 0; aspect-ratio: 29 / 20; background-position: center 75%; }
+  .trip-summary .eyebrow { top: 14%; left: 1.35rem; font-size: 0.64rem; }
+  .trip-summary h1 { top: 23%; left: 1.35rem; max-width: 56%; font-size: clamp(1.65rem, 8vw, 2.05rem); }
+  .session-time { right: 1.35rem; bottom: 30%; gap: 0.4rem; padding: 0.5rem 0.65rem; }
   .session-time svg { width: 23px; height: 23px; }
   .session-time small { font-size: 0.62rem; }
   .session-time strong { font-size: 1.02rem; }
-  .trip-note { margin-top: 0.5rem; padding: 0.5rem 0.65rem; font-size: 0.82rem; }
+  .trip-note { right: 1.35rem; bottom: 0; left: 1.35rem; padding: 0.5rem 0.65rem; font-size: 0.78rem; }
   .trip-details { grid-template-columns: 1fr 1fr; }
   .trip-details div:last-child { grid-column: 1 / -1; padding-top: 0.35rem; }
   .decision-buttons, .form-row { grid-template-columns: 1fr; }
@@ -903,6 +939,7 @@ footer { width: min(100% - 2rem, 760px); margin: 2rem auto 0; padding: 1.5rem 0 
   .trip-group-heading h2 { font-size: 1.55rem; }
   .trip-group-actions { display: grid; grid-template-columns: 1fr 1fr; }
   .add-car-button, .join-any-car-button { min-width: 0; }
+  .roster { padding-right: 1rem; padding-left: 1rem; }
   .visual-car-list { grid-template-columns: 1fr; }
   .waitlist-action { grid-template-columns: auto 1fr; }
   .waitlist-action .secondary-button { grid-column: 1 / -1; width: 100%; }
@@ -916,8 +953,10 @@ footer { width: min(100% - 2rem, 760px); margin: 2rem auto 0; padding: 1.5rem 0 
 }
 
 @media (max-width: 355px) {
-  .trip-summary { grid-template-columns: 1fr; }
-  .session-time { grid-column: 1; grid-row: auto; width: fit-content; margin-top: 0.35rem; }
+  .trip-summary .eyebrow { left: 1rem; }
+  .trip-summary h1 { left: 1rem; max-width: 58%; font-size: 1.55rem; }
+  .session-time { right: 1rem; bottom: 30%; padding: 0.42rem 0.55rem; }
+  .trip-note { right: 1rem; left: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
