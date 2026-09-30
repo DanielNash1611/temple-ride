@@ -149,5 +149,5 @@ test("a conflict that consumes the final seat rejects the stale signup without l
   const saved = (await store.read()).trips[0];
   assert.deepEqual(saved.drivers[0].riders.map((rider) => rider.id), ["external-winner"]);
   assert.equal(saved.waitlist.length, 0);
-  assert.equal(saved.changeLog.some((entry) => entry.name === "Stale Traveler"), false);
+  assert.equal(saved.changeLog.some((entry) => entry.displayName === "Stale Traveler"), false);
 });
