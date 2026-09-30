@@ -131,3 +131,23 @@ test("a shared-state conflict retries without losing the other signup", async ()
   assert.equal(savedTrip.waitlist[0].name, "Other Rider");
   assert.equal(savedTrip.drivers[0].riders[0].name, "Kylie");
 });
+
+test("a conflict that consumes the final seat rejects the stale signup without losing the winner", async () => {
+  const backend = new RevisionBackend();
+  const store = new CarpoolStore("unused.json", { backend });
+  const trip = backend.state.trips[0];
+  const driver = await store.addDriver(trip.id, { name: "Final Seat Driver", seats: 1 });
+  backend.conflictMutation = (state) => {
+    state.trips[0].drivers[0].riders.push({
+      id: "external-winner", name: "External Passenger", createdAt: "2026-09-30T12:00:00.000Z",
+    });
+  };
+  await assert.rejects(
+    store.addRider(trip.id, { name: "Stale Traveler", driverId: driver.id }),
+    (error) => error.status === 409,
+  );
+  const saved = (await store.read()).trips[0];
+  assert.deepEqual(saved.drivers[0].riders.map((rider) => rider.id), ["external-winner"]);
+  assert.equal(saved.waitlist.length, 0);
+  assert.equal(saved.changeLog.some((entry) => entry.name === "Stale Traveler"), false);
+});
