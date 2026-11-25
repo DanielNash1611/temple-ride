@@ -1,4 +1,5 @@
 data/app-data.json
+data/temple-week-experiment.json
 data/*.tmp
 .DS_Store
 node_modules/

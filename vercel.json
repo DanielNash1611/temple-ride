@@ -7,7 +7,7 @@
       "use": "@vercel/node",
       "config": {
         "includeFiles": ["public/**"],
-        "excludeFiles": ["data/app-data.json", "data/*.tmp", "tests/**"]
+        "excludeFiles": ["data/app-data.json", "data/temple-week-experiment.json", "data/*.tmp", "tests/**"]
       }
     }
   ],

@@ -1,0 +1,162 @@
+.brand { text-decoration: none; }
+.admin-link { display: inline-flex; align-items: center; }
+.week-status { position: sticky; top: .5rem; z-index: 2; margin: .8rem 0; padding: .8rem 1rem; border-left: 4px solid var(--forest); border-radius: 8px; background: var(--soft-green); line-height: 1.4; }
+.week-header { padding: 1.8rem 0 1.2rem; }
+.week-header h1 { max-width: none; font-size: clamp(2.1rem, 7vw, 3rem); }
+.week-header .lead { margin: .75rem 0 1rem; }
+.week-dates { font-weight: 700; color: var(--forest); margin: 1rem 0 .5rem; }
+.week-header .temple-name { margin: .7rem 0; }
+.week-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin: 1rem 0; }
+.week-actions > button { min-height: 48px; }
+.group-view-tabs button[aria-pressed="true"] { color: var(--forest); background: var(--surface); box-shadow: 0 2px 6px rgba(23, 63, 53, .1); }
+.day-section { margin: 0; border-top: 1px solid var(--line); }
+.day-section h2 { font-size: 1.25rem; margin: 0; }
+.day-toggle { width: 100%; min-height: 80px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem .5rem; border: 0; border-radius: 10px; background: transparent; color: var(--forest); text-align: left; font: inherit; font-weight: 700; cursor: pointer; scroll-margin-top: .5rem; }
+.day-toggle:hover, .day-toggle[aria-expanded="true"] { background: var(--soft-green); }
+.day-toggle small { display: block; margin-top: .3rem; color: var(--muted); font: 500 .85rem/1.4 Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.day-chevron { flex-shrink: 0; transition: transform 140ms ease; }
+.day-toggle[aria-expanded="true"] .day-chevron { transform: rotate(180deg); }
+.day-times { padding: 0 .5rem 1rem; }
+.day-times .day-empty { padding-top: 1rem; }
+.session-link { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .9rem 0; color: var(--ink); text-decoration: none; min-height: 76px; border-top: 1px solid var(--line); transition: background 140ms ease, padding 140ms ease; }
+.session-link:hover { background: var(--soft-green); padding-inline: .6rem; }
+.session-link strong { color: var(--forest); font-size: 1.15rem; }
+.session-link small { display: block; color: var(--muted); line-height: 1.5; margin-top: .25rem; font-size: .86rem; }
+.session-arrow { color: var(--forest); font-size: 1.4rem; }
+.day-empty { margin: 0 0 .5rem; color: var(--muted); font-size: .9rem; }
+.week-empty { padding: 2rem 0; }
+.session-heading { margin: 1rem 0 1.5rem; }
+.session-heading h1 { max-width: none; font-size: clamp(2rem, 7vw, 2.8rem); }
+.session-heading p { margin: .6rem 0; }
+.session-note { padding: .8rem 0; line-height: 1.5; }
+.roster-group { padding: 1.2rem 0; border-top: 1px solid var(--line); }
+.roster-group h2 { font-size: 1.5rem; }
+.week-car { padding: 1.2rem 0; border-bottom: 1px solid var(--line); }
+.week-car:first-child { padding-top: .3rem; }
+.week-car:last-child { border-bottom: 0; }
+.car-title { display: flex; gap: .5rem; align-items: baseline; justify-content: space-between; margin-bottom: .75rem; }
+.person-name { padding: .45rem 0; border: 0; background: none; font-weight: 750; color: var(--forest); text-align: left; min-height: 44px; text-decoration: underline; text-underline-offset: .2rem; overflow-wrap: anywhere; }
+.car-title small { color: var(--muted); white-space: nowrap; }
+.company { display: block; color: var(--forest); font-size: .83rem; line-height: 1.45; font-weight: 500; }
+.session-language { display: block; margin-top: .35rem; color: var(--muted); font-size: .95rem; }
+.own-transport-action { min-height: 44px; margin: 0 0 1rem; text-align: left; }
+.car-company-note { margin: .8rem 0 0; color: var(--forest); font-size: .85rem; line-height: 1.5; }
+.person-list { list-style: none; padding: 0; margin: 0; }
+.person-list li { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .65rem 0; border-bottom: 1px solid var(--line); }
+.person-list li:last-child { border-bottom: 0; }
+.person-list small { color: var(--muted); }
+.person-list .secondary-button { font-size: .85rem; padding: .6rem .8rem; }
+.form-context { color: var(--forest); font-weight: 700; line-height: 1.5; padding-bottom: .85rem; border-bottom: 1px solid var(--line); }
+.week-form { display: grid; gap: .75rem; }
+.week-form label { margin: 0; }
+.week-form .form-help { margin: -.1rem 0 .3rem; }
+.check-label { display: flex; align-items: flex-start; gap: .7rem; font-weight: 500; line-height: 1.45; padding: .5rem 0; }
+.check-label input { flex: 0 0 24px; width: 24px; height: 24px; min-height: 24px; margin-top: 2px; accent-color: var(--forest); }
+.form-error { padding: .8rem; border-left: 4px solid var(--danger); background: #fff1ee; color: var(--danger); line-height: 1.5; }
+.confirm-section { border-top: 1px solid var(--line); padding-top: 1rem; margin-top: .5rem; }
+.confirm-section input { margin: .6rem 0; }
+.danger-explanation { color: var(--danger); font-weight: 600; line-height: 1.45; }
+.manage-actions, .move-options { display: grid; gap: .7rem; }
+.move-options button { text-align: left; }
+.move-options button[aria-pressed="true"] { background: var(--forest); color: white; }
+.week-form [hidden], [hidden] { display: none !important; }
+dialog { width: min(100% - 1.5rem, 540px); max-height: calc(100dvh - 2rem); overflow-y: auto; padding: 1.3rem; margin: auto; border-radius: 24px; }
+dialog[open] { animation: dialog-in 140ms ease-out; }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.dialog-heading { align-items: flex-start; }
+.dialog-heading h2 { margin: .4rem 0 .5rem; }
+.help-steps { padding-left: 1.25rem; line-height: 1.6; }
+.help-steps li { margin-bottom: 1rem; }
+.admin-section { padding: 1.5rem 0; border-top: 1px solid var(--line); }
+.admin-session { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; padding: .8rem 0; border-bottom: 1px solid var(--line); }
+.admin-session strong { flex: 1 1 100%; }
+.admin-session button { min-height: 44px; }
+.log-list { padding-left: 1.25rem; line-height: 1.5; }
+.log-list li { margin-bottom: 1rem; }
+.log-list small { display: block; color: var(--muted); }
+@media (min-width: 650px) { .week-header { padding-top: 2.2rem; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+.flexible-action { margin: 1rem 0 .6rem; min-height: 48px; width: 100%; }
+.flexible-list { padding: .5rem 0 1rem; border-bottom: 1px solid var(--line); }
+.flexible-list h3 { font-size: 1.05rem; margin: .5rem 0; }
+.flexible-list .person-list li { align-items: flex-start; }
+.flexible-list .person-list small { max-width: 45%; line-height: 1.5; padding-top: .5rem; }
+.week-form select { width: 100%; min-width: 0; }
+
+.ride-pending { display:block; color:#76521c; font-size:.85rem; font-weight:600; line-height:1.5; }
+.pending-seat { background:repeating-linear-gradient(135deg,#f5e7c9,#f5e7c9 7px,#fff7e8 7px,#fff7e8 14px) !important; }
+.flexible-car { min-width:0; }
+.flexible-car .form-help { line-height:1.6; }
+
+.week-hero { min-height: 210px; display: flex; align-items: flex-end; padding: 1.2rem; border-radius: 18px; overflow: hidden; background: linear-gradient(90deg, rgba(255,253,248,.95) 0%, rgba(255,253,248,.84) 46%, rgba(255,253,248,.18) 100%), url('/assets/los-angeles-temple-approach.jpg') center 47% / cover; }
+.week-hero-copy { max-width: 85%; }
+.week-hero h1 { font-size: clamp(2rem, 6vw, 2.8rem); margin: 0; }
+.week-hero .temple-name { font-size: 1rem; color: var(--forest); }
+.week-hero .week-dates { margin: .5rem 0 0; line-height: 1.5; font-size: .9rem; }
+.week-note { color: var(--muted); font-size: .85rem; line-height: 1.5; margin: .6rem 0 1.2rem; }
+.signup-start { padding: .8rem 0 1.5rem; }
+.signup-start h2 { font-size: 1.45rem; margin: .4rem 0; }
+.signup-start > p { line-height: 1.5; color: var(--muted); margin: .5rem 0 1rem; }
+.day-choices, .session-choices { padding: 0; margin: 0; border: 0; min-width: 0; }
+.day-choices { display: grid; gap: .5rem; }
+.day-choice, .session-choice { display: flex; align-items: center; gap: .8rem; padding: .75rem; margin: 0; min-height: 56px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; font-weight: 650; }
+.day-choice:has(:checked), .session-choice:has(:checked) { background: var(--soft-green); border-color: var(--forest); box-shadow: inset 0 0 0 1px var(--forest); }
+.day-choice:has(:disabled) { opacity: .6; cursor: default; }
+.day-choice input, .session-choice input { width: 24px; height: 24px; min-height: 24px; flex: 0 0 24px; accent-color: var(--forest); }
+.day-choice small, .session-choice small { display: block; color: var(--muted); font-weight: 400; font-size: .85rem; line-height: 1.5; }
+.day-next { position: sticky; bottom: 0; padding: .8rem 0 .5rem; background: var(--paper); z-index: 1; }
+.day-next .primary-button { width: 100%; min-height: 48px; }
+.day-next .form-help { text-align: center; margin: .4rem 0 0; }
+.browse-roster { border-top: 1px solid var(--line); padding: 1rem 0; }
+.browse-roster > summary { min-height: 48px; padding: .6rem 0; font-weight: 700; color: var(--forest); cursor: pointer; }
+.session-choices { display: grid; gap: .5rem; }
+.session-choices legend { font-weight: 750; color: var(--forest); margin: .8rem 0 .5rem; }
+.session-shortcuts { display: flex; flex-wrap: wrap; gap: .5rem; }
+.session-shortcuts button { min-height: 44px; font-size: .85rem; padding: .5rem .7rem; }
+.selection-actions { display: grid; gap: .65rem; }
+.selection-actions h3 { margin: .3rem 0; font-size: 1.1rem; }
+.selection-count { font-weight: 700; color: var(--forest); margin: .7rem 0 .3rem; }
+@media (min-width: 650px) { .day-choices { grid-template-columns: 1fr 1fr; } .week-hero { min-height: 240px; padding: 1.7rem; background-position: center 43%; } .week-hero-copy { max-width: 65%; } .day-next .primary-button { width: auto; min-width: 240px; } .day-next .form-help { text-align: left; } }
+
+.card-match { margin-block: .75rem; }
+.card-match .form-help { margin: 0; }
+.person-list li:has(> .card-match) { flex-wrap: wrap; }
+.person-list li > .card-match { flex: 1 0 100%; min-width: 0; margin: 0; }
+
+.ride-finder { margin-block: 1.25rem .5rem; }
+.ride-finder-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .2rem .8rem; }
+.ride-finder h2 { margin: 0; font-size: 1.65rem; }
+.ride-finder-heading button { min-height: 44px; }
+.ride-finder h3 { font-size: 1rem; margin: .75rem 0 .5rem; }
+.ride-options { display: grid; gap: .5rem; }
+.ride-option { width: 100%; min-width: 0; display: grid; gap: .25rem; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); text-align: left; text-decoration: none; font: inherit; color: var(--forest); cursor: pointer; overflow-wrap: anywhere; }
+.ride-option:hover, .ride-option:focus-visible { border-color: var(--forest); background: var(--soft-green); }
+.ride-option > span { font-size: .9rem; }
+.ride-action { font-weight: 700; }
+.browse-roster { border-block: 1px solid var(--line); }
+@media (min-width: 650px) { .ride-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.role-start { margin-block: 1.2rem; }
+.role-start h2 { font-size: 1.45rem; }
+.role-start .week-actions { display: grid; gap: .5rem; }
+.role-start button[aria-pressed="true"] { background: var(--forest); color: white; }
+#ask-support, [data-join-day] { min-height: 48px; }
+.ride-finder section > .ride-finder-heading { margin: .75rem 0 .5rem; }
+.nursing-choice { margin-inline-start: 1.5rem; }
+@media (min-width: 650px) { .role-start .week-actions { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+
+.session-offer { cursor: default; }
+.session-offer-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1rem; }
+.session-offer-actions > * { min-height: 44px; display: inline-flex; align-items: center; }
+.session-car-info { font-weight: 600; }
+
+.event-card { padding: .85rem 0; border-bottom: 1px solid var(--line); }
+.event-card h3, .event-card p { margin: .25rem 0; }
+.event-card .week-actions { margin-bottom: 0; }
+.event-card a.secondary-button { display: inline-flex; align-items: center; text-decoration: none; min-height: 48px; }
+.event-history summary { color: var(--forest); cursor: pointer; font-weight: 700; padding-block: .65rem; }
+.event-fields { display: grid; gap: .6rem; min-width: 0; margin-bottom: .65rem; }
+.event-fields input { width: 100%; min-width: 0; }
+.preview-banner { background: var(--soft-green); padding: 1rem; border-radius: .75rem; margin-block: .5rem; }
+.preview-banner p { margin: .35rem 0; }

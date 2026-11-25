@@ -52,9 +52,33 @@ vercel --prod
 
 Vercel supplies `BLOB_READ_WRITE_TOKEN` when the store is connected. Neither that token nor the administrator PIN belongs in the repository.
 
+## Local Temple Week experiment
+
+The approved experiment in PRD section 14 supports one organizer-configured temple and seven-day period, with multiple endowment times per day, displayed session languages, shared rides, self-transportation, and independent company requests.
+
+```bash
+npm run dev:temple-week
+```
+
+Open [http://localhost:3001](http://localhost:3001). The local demo PIN is `2468` unless `TEMPLE_CARPOOL_ADMIN_PIN` is set. Choose **Admin**, set the temple and first day, and post the endowment times and languages from the current official temple schedule. Members return to **Temple week**, expand a day and choose a session time, then use **Add my car**, **I need a ride**, or **I have my own transportation**. A ride request fills an open car first and joins the waiting list if none are available. The week stays visible until the organizer changes or removes it.
+
+This launcher binds to localhost, uses only the ignored `data/temple-week-experiment.json`, and disables Blob access even if hosted credentials are present. It ignores the pilot data-file and port environment variables; use `TEMPLE_WEEK_PORT=3002 npm run dev:temple-week` if port 3001 is occupied. Restart the launcher after server changes. The normal `npm start` entrypoint still serves the single-trip pilot. Neither state format migrates the other.
+
+Members can select **I need a ride** even while seats remain available. Company requests do not take seats, pair people, or clear automatically when a ride is found. Use **Edit plans** to change transportation or company preferences; changes and removals require the displayed name. Coordination remains outside the app.
+
+The local week includes the organizer-provided Friday/Saturday chart from previous research (PRD §14.5), with the three specified Saturday languages. Blank languages show “Language not set.” This chart has not been freshly verified against the Church’s signed-in reservation system. Earlier sample plans remain demo data.
+
+Childcare, other ordinance types, companion pairing, production migration, and deployment are deferred. Before considering a live rollout, observe less technology-confident members using the three main flows without coaching. See [Temple Week verification](docs/temple-week-verification.md) for the current evidence and remaining gate.
+
 ## Checks
 
 ```bash
 npm run check
 npm test
 ```
+
+The local experiment also supports **My time is flexible**: select a day and a range of listed session starts. Flexible plans reserve no seats and appear separately from each session roster. After coordinating, open the flexible name and choose one session; the server atomically replaces availability with that session's signup. Drivers offer capacity only at the confirmed time; riders receive a current seat or a clearly labeled waiting entry. See PRD §14.6.
+
+Flexible cars now accept intended-seat requests: pending and accepted riders hold capacity and narrow the car's possible sessions to times everyone can attend. The driver accepts/declines riders, then picks one compatible final time for the whole car. Fixed-session requests also await driver acceptance in the experiment. Typed driver names record a trusted-group decision; they do not authenticate the driver. PRD §14.7 supersedes the earlier unconnected-availability behavior above.
+
+The primary entry is now **choose day(s) → select exact sessions → offer/request a ride** (PRD §14.8). Multiple selections, including gaps and different days, mean alternatives for one visit. Afternoon/evening shortcuts only select posted starts. Existing cars are under the initially closed browsing disclosure; fresh loads have no selected days or expanded sessions.

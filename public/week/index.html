@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#173f35" />
+  <meta name="description" content="Share your plans, rides, and company during temple week." />
+  <title>Temple Week · Temple Ride</title>
+  <link rel="icon" href="/assets/temple-ride-mark.png" />
+  <link rel="stylesheet" href="/styles.css?v=20260820-temple" />
+  <link rel="stylesheet" href="/week/styles.css?v=8" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
+    <a class="brand" href="#week"><span class="brand-mark"><img src="/assets/temple-ride-mark.png" alt="" width="46" height="46" /></span>Temple Ride</a>
+    <a class="text-button admin-link" href="#admin">Admin</a>
+  </header>
+  <main id="main-content" tabindex="-1">
+    <p id="status" class="week-status" role="status" aria-live="polite" hidden></p>
+    <aside id="preview-banner" class="preview-banner" hidden><strong>Organizer preview</strong><p>Explore the member view. Signups are disabled here.</p><a class="text-button" href="/#admin">Return to Admin</a></aside>
+    <div id="view"><p class="lead">Loading temple week…</p></div>
+  </main>
+  <footer><button class="text-button" id="help-button" type="button">How this works</button><p>Names, plans, and ride choices shared with your trusted group.</p></footer>
+  <dialog id="form-dialog" aria-labelledby="form-heading"></dialog>
+  <dialog id="review-dialog" aria-labelledby="review-heading"></dialog>
+  <dialog id="help-dialog" aria-labelledby="help-heading">
+    <div class="dialog-heading"><h2 id="help-heading">How this works</h2><button class="close-button" data-close type="button" aria-label="Close help">×</button></div>
+    <div id="week-help"><ol class="help-steps"><li>Choose a ride option, or select <strong>I need help to attend</strong> to ask the organizer for babysitting or other support. If you’re still deciding, pick times, review available cars, then choose to drive or ride. Riders can use <strong>Join Any Car</strong> beside a session time or browse <strong>Find a ride</strong> to see sessions with open seats or choose possible times with a flexible driver.</li><li>For other times, choose one or more <strong>days</strong>, then select the exact endowment sessions you could attend. Languages appear beside each time.</li><li>Choose <strong>I can offer a ride</strong> or <strong>I need a ride</strong> and enter your name. Multiple choices mean one session still to be decided.</li><li>Open <strong>See all sessions and existing plans</strong> to request a place in a flexible car or manage an existing signup. Drivers accept riders and choose a shared compatible session.</li></ol>
+    <p>Afternoons selects listed starts from noon to before 5 PM; evenings selects starts from 5 PM onward. You can add or remove any individual session.</p></div>
+    <p id="session-help" hidden>Choose <strong>Add my car</strong> to offer seats or <strong>I need a ride</strong> to ask for a place. The driver accepts ride requests. Choose <strong>I need help to attend</strong> to ask the organizer for support.</p>
+    <p>Ride signups do not reserve a temple appointment. Coordinate with each other outside the app. A company request stays visible until you clear it.</p>
+    <p class="privacy-note">Everyone with access can see names, transportation, and company requests. Members of this trusted group can edit or remove entries without identity verification.</p>
+    <button class="primary-button" data-close type="button">Got it</button>
+  </dialog>
+  <script type="module" src="/week/app.js?v=10"></script>
+</body>
+</html>

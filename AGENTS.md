@@ -13,6 +13,8 @@ Before planning, reviewing, or implementing product work, read `docs/PRD.md` in 
 
 ## Repository map
 
+The approved local Temple Week experiment is specified in PRD section 14. Its isolated launcher, store, and interface may support multiple endowment sessions within one organizer-configured week, with organizer-posted empty slots and session languages. Use the original car visual. In experiment mode only, a ride request fills the car with the fewest open seats or joins the waiting list; company edits do not automatically move waiting members. Verify current timetable data against the official schedule and leave unknown languages unset. PRD §14.5 permits the organizer-provided Friday/Saturday research chart as local experiment data, with its provenance recorded and no claim of fresh official verification. The one-active-trip and administrator-only-creation rules below continue to govern the normal pilot; section 14 supplies explicit exceptions only for the local experiment. Do not deploy or migrate pilot data as part of this experiment.
+
 - `docs/PRD.md`: approved product requirements and acceptance criteria.
 - `server.js`: HTTP routes, request limits, static serving, and administrator authorization.
 - `lib/store.js`: validation, current-trip rules, roster mutations, and local persistence.
@@ -64,3 +66,21 @@ Before considering product work complete, confirm:
 - Relevant automated checks pass.
 - Mobile and accessibility effects were considered and, for UI changes, exercised.
 - Documentation describes only verified behavior.
+
+## Flexible availability in the local experiment
+
+PRD §14.6 records the approved one-session-within-a-range behavior. Keep flexible entries outside session rosters and seat totals. Explicit confirmation atomically replaces availability with one participant, preserving ID/company and checking capacity and current context. Preserve simple fixed-session rider entry; scheduling flexibility is optional. Week/session/private-log/pilot isolation rules still apply. Verify phone layouts before desktop; do not claim a waiting rider has a confirmed seat.
+
+PRD §14.7 supersedes the unconnected-flexibility rule: pending/accepted riders hold an intended place in one flexible car and intersect its possible sessions immediately. Driver acceptance is recorded with typed-driver-name confirmation under the existing trusted-group model (not verified identity). Resolve all pending requests before atomically moving the car and accepted riders to one compatible session. Declines/cancellation preserve rider availability; never overbook held seats. New fixed-session ride requests also require driver acceptance in experiment mode only.
+
+PRD §14.8 makes day(s) → exact session checklist → ride role the primary entry flow. Default to no selections and closed browsing disclosures; restore the original temple image in the header. Store exact selected session IDs/revisions (including multiple days and gaps), never silently expand them into a continuous time range. Use set intersection for intended seats and keep the §14.7 safeguards. Finish browser testing with a fresh, unselected landing page.
+
+PRD §14.9 authorizes explicit one-click ride matching in the local experiment: riders hold any compatible seat pending acceptance; drivers add compatible independent riders with acceptance. These two commands waive typed-name entry only, retain revision checks, recompute common sessions after every placement, and never run in the background or in the pilot.
+
+PRD §14.10 places available fixed and flexible rides before the day picker. Keep the full timetable accessible, and preserve the day-first signup sequence for other plans.
+
+PRD §14.11 adds role-first entry, day-specific Join Any Car, and a private week-scoped organizer support inbox. Keep support needs outside rosters, matching, and session logs. Nursing credentials are a requested qualification for organizer follow-up.
+
+PRD §14.13 allows the organizer to show the whole week or one scheduled session to all members in the local experiment. Keep all rosters in the same week store. Scope member reads, writes and matching to the published view, retain the full PIN-protected organizer view, and invalidate stale forms after a switch.
+
+PRD §14.14 adds saved session and week events to the isolated experiment. New drafts, previews and history are organizer-only. Preserve the previous event atomically on activation, keep every member action scoped to the active event, and reject forms opened before an event switch or reactivation.

@@ -7,8 +7,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "dev:temple-week": "node scripts/temple-week.js",
     "test": "node --test",
-    "check": "node --check server.js && node --check lib/store.js && node --check lib/blob-backend.js && node --check public/app.js"
+    "check": "node --check server.js && node --check lib/store.js && node --check lib/blob-backend.js && node --check lib/week-store.js && node --check scripts/temple-week.js && node --check public/app.js && node --check public/week/app.js"
   },
   "engines": {
     "node": ">=20"
