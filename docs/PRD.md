@@ -1,5 +1,7 @@
 # Temple Ride — Product Requirements Document
 
+> Approved scope update, October 1, 2026: Daniel requested analytics across the live products. Temple Ride now counts signup starts and successful saves using fixed event names and tab-session pseudonymous IDs. No names, rides, trip IDs, locations, notes or roster content enter analytics. DNT, GPC and the visible opt-out are honored; local development sends nothing. Organizer feedback remains the pilot success measure. See [analytics notes](DANIEL_ANALYTICS.md).
+
 **Status:** Approved
 
 **Product:** Temple Ride

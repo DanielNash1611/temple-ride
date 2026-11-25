@@ -873,6 +873,7 @@ document.querySelector('#driver-form').addEventListener('submit', async (event) 
   event.preventDefault();
   const form = event.currentTarget;
   const button = form.querySelector('button[type=submit]');
+  void analytics.track("signup_started");
   try {
     setBusy(button, true, 'Adding car…');
     const saved = await saveWithNameReview({
@@ -882,6 +883,7 @@ document.querySelector('#driver-form').addEventListener('submit', async (event) 
       convertDriverToRider: true
     });
     if (!saved) return;
+    void analytics.track("signup_completed");
     form.reset();
     closeDriverPanel();
     await refreshState();
@@ -899,6 +901,7 @@ document.querySelector('#rider-form').addEventListener('submit', async (event) =
   event.preventDefault();
   const form = event.currentTarget;
   const button = form.querySelector('button[type=submit]');
+  void analytics.track("signup_started");
   try {
     setBusy(button, true, 'Saving your seat…');
     const saved = await saveWithNameReview({
@@ -907,6 +910,7 @@ document.querySelector('#rider-form').addEventListener('submit', async (event) =
       allowCarChoice: true
     });
     if (!saved) return;
+    void analytics.track("signup_completed");
     closeRiderDialog(false);
     await refreshState();
     showToast(saved.result.placement === 'car' ? 'You’re riding with ' + saved.result.driverName + '.' : 'You’re on the rider list.');
@@ -1106,3 +1110,7 @@ Promise.all([
   elements.memberEmpty.querySelector('h1').textContent = 'The app could not load';
   elements.memberEmpty.querySelector('p').textContent = error.message;
 });
+import { analytics } from "./analytics/index.js";
+import { mountPrivacyControl } from "./analytics/browser.js";
+mountPrivacyControl(document.querySelector("#analytics-privacy"), analytics);
+analytics.page();

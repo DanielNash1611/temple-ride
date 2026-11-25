@@ -8,7 +8,7 @@ import { CarpoolStore, StoreError, getOpenSeats } from "../lib/store.js";
 async function withStore(run, storeOptions) {
   const directory = await mkdtemp(join(tmpdir(), "temple-ride-test-"));
   try {
-    return await run(new CarpoolStore(join(directory, "state.json"), storeOptions));
+    return await run(new CarpoolStore(join(directory, "state.json"), storeOptions), join(directory, "state.json"));
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
@@ -261,4 +261,47 @@ test("records current-trip changes without claiming a member identity", () => wi
   assert.equal(log[0].actor, "member");
   assert.equal("ipAddress" in log[0], false);
   assert.equal("userId" in log[0], false);
+}));
+
+test("persists roster and change log across store recreation without aliasing reads", () => withStore(async (store, filePath) => {
+  const trip = await setCurrentTrip(store);
+  const driver = await store.addDriver(trip.id, { name: "Persistence Driver", seats: 2 });
+  await store.addRider(trip.id, { name: "Saved Passenger", driverId: driver.id });
+  const before = await store.read();
+  before.trips[0].drivers[0].riders.length = 0;
+  const restarted = new CarpoolStore(filePath);
+  const after = await restarted.read();
+  assert.equal(after.trips[0].drivers[0].riders[0].name, "Saved Passenger");
+  assert.equal((await store.readChangeLog(trip.id))[0].type, "rider_added");
+}));
+
+test("last-seat concurrent signups persist one winner and leave the queue usable", () => withStore(async (store) => {
+  const trip = await setCurrentTrip(store);
+  const driver = await store.addDriver(trip.id, { name: "Single Driver", seats: 1 });
+  const results = await Promise.allSettled([
+    store.addRider(trip.id, { name: "First Passenger", driverId: driver.id }),
+    store.addRider(trip.id, { name: "Second Traveler", driverId: driver.id }),
+  ]);
+  assert.equal(results.filter((r) => r.status === "fulfilled").length, 1);
+  const rejection = results.find((r) => r.status === "rejected");
+  assert.equal(rejection.reason.status, 409);
+  await store.addRider(trip.id, { name: "Waiting Person" });
+  const state = await store.read();
+  assert.equal(state.trips[0].drivers[0].riders.length, 1);
+  assert.equal(getOpenSeats(state.trips[0].drivers[0]), 0);
+  assert.equal(state.trips[0].waitlist[0].name, "Waiting Person");
+  assert.equal((await store.readChangeLog(trip.id)).filter((e) => e.type === "rider_added").length, 2);
+}));
+
+test("validates leap days and 24-hour boundaries without mutating rejected state", () => withStore(async (store) => {
+  const trip = await setCurrentTrip(store, { ...tripInput, date: "2028-02-29", sessionTime: "00:00" });
+  await store.updateTrip(trip.id, { ...tripInput, date: "2028-02-29", sessionTime: "23:59" });
+  const before = await store.read();
+  for (const input of [
+    { date: "2027-02-29" }, { date: "2028-13-01" }, { date: "2028-04-31" },
+    { sessionTime: "24:00" }, { sessionTime: "12:60" }, { sessionTime: "9:00" },
+  ]) {
+    await assert.rejects(store.updateTrip(trip.id, { ...tripInput, ...input }), StoreError);
+    assert.deepEqual(await store.read(), before);
+  }
 }));
