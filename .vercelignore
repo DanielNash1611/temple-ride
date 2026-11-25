@@ -1,5 +1,7 @@
-data/app-data.json
-data/*.tmp
-coverage
-test-results
-.env.local
+data/
+.env*
+.codex/
+tmp/
+output/
+coverage/
+test-results/

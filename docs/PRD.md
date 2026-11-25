@@ -387,3 +387,7 @@ The active event card opens the corresponding organizer editor through **Edit se
 **Make active** publishes the selected event and moves the previous active event into history in one operation. **End event** moves it to history and closes signups until another event is selected. History preserves the event’s schedule, rosters, flexible plans, private requests and logs. Organizers can preview or reactivate an event. The existing local week starts as the active event.
 
 Acceptance extends §§7.1, 7.4, 9, 12 and 14.3–14.4. Draft, preview, history and publication actions require the PIN on every request. Members see at most one active event. Stale forms cannot write across a switch or a subsequent reactivation. Simultaneous publication attempts cannot overwrite the other organizer’s choice. Saving or previewing a draft leaves the active event available to members.
+
+### 15. Production events rollout
+
+Publish the §14 event planner to the existing ward site. The production pilot’s current trip becomes the active **Temple Session**, including its original date, time, notes, IDs, cars, seated and waiting riders, and private change log. Existing seated riders keep their confirmed places. Use the existing private administrator PIN and separate private event storage with conditional writes. Initialize it once from the live pilot roster. Keep the original roster for recovery and the local demo isolated. This approves the production scope previously deferred in §§14.1 and 14.4. Member observation remains outstanding.

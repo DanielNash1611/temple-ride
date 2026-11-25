@@ -11,6 +11,10 @@ Temple Ride is a deliberately simple mobile web app for organizing carpools to t
 
 Everyone sees one current temple trip—there is no trip picker. Administrators can update its temple, date, session time, and note, replace it when needed, remove names, and review the current trip's change log. The admin area and change log are protected by a PIN so the regular member flow stays focused.
 
+## Hosted events
+
+The production site uses the event planner in PRD §§14–15. The existing active trip carries forward as a Temple Session. Production event data lives in a separate private Blob beside the original pilot document. To initialize it after production traffic reaches the event release, run `node scripts/import-production-event.js --publish` with the production Blob environment. Omitting the flag rehearses the conversion. Subsequent runs preserve the existing event store. During cutover the site displays the pilot session and pauses writes until the import completes. Recover using the private event document after new signups are accepted. The original pilot document is a pre-cutover copy.
+
 ## Run it
 
 Temple Ride requires Node.js 20 or newer.
@@ -62,13 +66,13 @@ npm run dev:temple-week
 
 Open [http://localhost:3001](http://localhost:3001). The local demo PIN is `2468` unless `TEMPLE_CARPOOL_ADMIN_PIN` is set. Choose **Admin**, set the temple and first day, and post the endowment times and languages from the current official temple schedule. Members return to **Temple week**, expand a day and choose a session time, then use **Add my car**, **I need a ride**, or **I have my own transportation**. A ride request fills an open car first and joins the waiting list if none are available. The week stays visible until the organizer changes or removes it.
 
-This launcher binds to localhost, uses only the ignored `data/temple-week-experiment.json`, and disables Blob access even if hosted credentials are present. It ignores the pilot data-file and port environment variables; use `TEMPLE_WEEK_PORT=3002 npm run dev:temple-week` if port 3001 is occupied. Restart the launcher after server changes. The normal `npm start` entrypoint still serves the single-trip pilot. Neither state format migrates the other.
+This launcher binds to localhost, uses only the ignored `data/temple-week-experiment.json`, and disables Blob access even if hosted credentials are present. It ignores the pilot data-file and port environment variables; use `TEMPLE_WEEK_PORT=3002 npm run dev:temple-week` if port 3001 is occupied. Restart the launcher after server changes. The normal `npm start` entrypoint still serves the single-trip pilot. The local launcher never imports pilot data.
 
 Members can select **I need a ride** even while seats remain available. Company requests do not take seats, pair people, or clear automatically when a ride is found. Use **Edit plans** to change transportation or company preferences; changes and removals require the displayed name. Coordination remains outside the app.
 
 The local week includes the organizer-provided Friday/Saturday chart from previous research (PRD §14.5), with the three specified Saturday languages. Blank languages show “Language not set.” This chart has not been freshly verified against the Church’s signed-in reservation system. Earlier sample plans remain demo data.
 
-Childcare, other ordinance types, companion pairing, production migration, and deployment are deferred. Before considering a live rollout, observe less technology-confident members using the three main flows without coaching. See [Temple Week verification](docs/temple-week-verification.md) for the current evidence and remaining gate.
+Organizer-facilitated support is available. Other ordinance types and companion pairing are deferred. Before considering a live rollout, observe less technology-confident members using the three main flows without coaching. See [Temple Week verification](docs/temple-week-verification.md) for the current evidence and remaining gate.
 
 ## Checks
 

@@ -9,7 +9,7 @@
     "dev": "node --watch server.js",
     "dev:temple-week": "node scripts/temple-week.js",
     "test": "node --test",
-    "check": "node --check server.js && node --check lib/store.js && node --check lib/blob-backend.js && node --check lib/week-store.js && node --check scripts/temple-week.js && node --check public/app.js && node --check public/week/app.js"
+    "check": "node --check server.js && node --check lib/store.js && node --check lib/blob-backend.js && node --check lib/week-store.js && node --check lib/production-events.js && node --check scripts/import-production-event.js && node --check scripts/temple-week.js && node --check public/app.js && node --check public/week/app.js"
   },
   "engines": {
     "node": ">=22.23.4 <23 || >=24.22.1 <25"

@@ -6,6 +6,8 @@ import { BlobStateBackend } from "./lib/blob-backend.js";
 import { CarpoolStore, StoreError } from "./lib/store.js";
 import { WeekStore, publishedRoster, eventSummary } from "./lib/week-store.js";
 
+import { ProductionEventBackend, productionBlobs } from "./lib/production-events.js";
+
 const ROOT_DIR = fileURLToPath(new URL(".", import.meta.url));
 const PUBLIC_DIR = join(ROOT_DIR, "public");
 const DEFAULT_DATA_FILE = join(ROOT_DIR, "data", "app-data.json");
@@ -83,14 +85,16 @@ async function serveStatic(requestPath, response) {
 
 export function createAppHandler({
   experiment = false,
+  hostedBackend,
   dataFile = experiment ? join(ROOT_DIR, "data", "temple-week-experiment.json") : process.env.TEMPLE_CARPOOL_DATA_FILE || DEFAULT_DATA_FILE,
   adminPin = process.env.TEMPLE_CARPOOL_ADMIN_PIN || "2468",
   blobToken = process.env.BLOB_READ_WRITE_TOKEN,
   blobPathname = process.env.TEMPLE_CARPOOL_BLOB_PATH || "temple-ride/app-data.json"
 } = {}) {
   if (experiment && resolve(dataFile) === resolve(DEFAULT_DATA_FILE)) throw new Error("The experiment cannot use the pilot data file.");
-  const backend = !experiment && blobToken ? new BlobStateBackend({ pathname: blobPathname, token: blobToken }) : undefined;
-  const store = experiment ? new WeekStore(dataFile) : new CarpoolStore(dataFile, { backend });
+  const eventMode = experiment || Boolean(hostedBackend);
+  const backend = !eventMode && blobToken ? new BlobStateBackend({ pathname: blobPathname, token: blobToken }) : undefined;
+  const store = eventMode ? new WeekStore(dataFile, {backend:hostedBackend}) : new CarpoolStore(dataFile, { backend });
   const usesDemoPin = !process.env.TEMPLE_CARPOOL_ADMIN_PIN && adminPin === "2468";
 
   return async (request, response) => {
@@ -100,11 +104,11 @@ export function createAppHandler({
 
       if (request.method === "GET" && url.pathname === "/api/state") {
         const state = await store.read();
-        return sendJson(response, 200, memberState(experiment ? publishedRoster(state) : state));
+        return sendJson(response, 200, memberState(eventMode ? publishedRoster(state) : state));
       }
 
       if (request.method === "GET" && url.pathname === "/api/config") {
-        return sendJson(response, 200, { demoAdminPin: usesDemoPin ? "2468" : null, ...(experiment ? { mode: "temple-week" } : {}) });
+        return sendJson(response, 200, { demoAdminPin: usesDemoPin ? "2468" : null, ...(eventMode ? { mode: "temple-week" } : {}) });
       }
 
       if (request.method === "POST" && url.pathname === "/api/admin/verify") {
@@ -113,12 +117,12 @@ export function createAppHandler({
         return sendJson(response, 200, { ok: true });
       }
 
-      if (experiment && url.pathname === '/api/admin/week-state' && request.method === 'GET') {
+      if (eventMode && url.pathname === '/api/admin/week-state' && request.method === 'GET') {
         requireAdmin(request, adminPin);
         const state = await store.read();
         return sendJson(response, 200, {...memberState(state), events:(state.savedEvents || []).map(eventSummary)});
       }
-      if (experiment && segments.slice(0, 3).join('/') === 'api/admin/events') {
+      if (eventMode && segments.slice(0, 3).join('/') === 'api/admin/events') {
         requireAdmin(request, adminPin);
         const [, , , id, action] = segments;
         if (!id && request.method === 'POST') return sendJson(response, 201, await store.saveDraft(await readJson(request)));
@@ -128,12 +132,12 @@ export function createAppHandler({
         if (segments.length === 4 && id === 'end' && request.method === 'POST') return sendJson(response, 200, await store.changeActiveEvent(null, await readJson(request)));
         throw new StoreError('Unknown event action.', 404);
       }
-      if (experiment && url.pathname === '/api/week/member-view' && request.method === 'PATCH') {
+      if (eventMode && url.pathname === '/api/week/member-view' && request.method === 'PATCH') {
         requireAdmin(request, adminPin);
         return sendJson(response,200,await store.setMemberView(await readJson(request)));
       }
 
-      if (experiment && url.pathname === '/api/week/support') {
+      if (eventMode && url.pathname === '/api/week/support') {
         if (request.method === 'POST') {
           await store.requestSupport(await readJson(request));
           return sendJson(response, 201, {ok:true});
@@ -147,38 +151,38 @@ export function createAppHandler({
           return sendJson(response, 200, await store.completeSupport(await readJson(request)));
         }
       }
-      if (experiment && url.pathname === "/api/week" && ["POST", "PATCH", "DELETE"].includes(request.method)) {
+      if (eventMode && url.pathname === "/api/week" && ["POST", "PATCH", "DELETE"].includes(request.method)) {
         requireAdmin(request, adminPin);
         const body = await readJson(request);
         return sendJson(response, 200, request.method === "DELETE" ? await store.deleteWeek(body) : await store.saveWeek(body));
       }
 
-      if (experiment && request.method === 'POST' && segments.length === 4 && segments[0] === 'api' && segments[1] === 'week' && segments[2] === 'match') {
+      if (eventMode && request.method === 'POST' && segments.length === 4 && segments[0] === 'api' && segments[1] === 'week' && segments[2] === 'match') {
         return sendJson(response,200,await store.matchRide(segments[3],await readJson(request),{actor:isAdmin(request,adminPin)?'administrator':'member'}));
       }
 
-      if (experiment && url.pathname === "/api/week/plans" && request.method === "POST") {
+      if (eventMode && url.pathname === "/api/week/plans" && request.method === "POST") {
         return sendJson(response, 201, await store.addPlan(await readJson(request), { actor: isAdmin(request, adminPin) ? "administrator" : "member" }));
       }
 
-      if (experiment && segments[0] === 'api' && segments[1] === 'week' && segments[2] === 'availability') {
+      if (eventMode && segments[0] === 'api' && segments[1] === 'week' && segments[2] === 'availability') {
         const context = { actor: isAdmin(request, adminPin) ? 'administrator' : 'member' };
         if (request.method === 'POST' && segments.length === 3) return sendJson(response, 201, await store.saveAvailability(await readJson(request), context));
         if (request.method === 'PATCH' && segments.length === 4) return sendJson(response, 200, await store.saveAvailability(await readJson(request), context, segments[3]));
         if (request.method === 'DELETE' && segments.length === 4) return sendJson(response, 200, await store.removeAvailability(segments[3], await readJson(request), context));
       }
 
-      if (experiment && request.method === 'POST' && segments[0] === 'api' && segments[1] === 'week' && segments[2] === 'availability' && segments[4] === 'riders' && segments[5] && segments.length === 6) {
+      if (eventMode && request.method === 'POST' && segments[0] === 'api' && segments[1] === 'week' && segments[2] === 'availability' && segments[4] === 'riders' && segments[5] && segments.length === 6) {
         return sendJson(response,200,await store.decideFlexibleRide(segments[3],segments[5],await readJson(request),{actor:isAdmin(request,adminPin)?'administrator':'member'}));
       }
-      if (experiment && request.method === 'POST' && segments[0] === 'api' && segments[1] === 'trips' && segments[3] === 'drivers' && segments[5] === 'riders' && segments[6] && segments.length === 7) {
+      if (eventMode && request.method === 'POST' && segments[0] === 'api' && segments[1] === 'trips' && segments[3] === 'drivers' && segments[5] === 'riders' && segments[6] && segments.length === 7) {
         return sendJson(response,200,await store.decideSessionRide(segments[2],segments[4],segments[6],await readJson(request),{actor:isAdmin(request,adminPin)?'administrator':'member'}));
       }
 
       if (request.method === "POST" && url.pathname === "/api/trips") {
         requireAdmin(request, adminPin);
         const trip = await store.createTrip(await readJson(request));
-        if (experiment) {
+        if (eventMode) {
           const { changeLog, ...session } = trip;
           return sendJson(response, 201, session);
         }
@@ -200,7 +204,7 @@ export function createAppHandler({
 
         if (request.method === "DELETE" && segments.length === 3) {
           requireAdmin(request, adminPin);
-          return sendJson(response, 200, await store.deleteTrip(tripId, experiment ? await readJson(request) : undefined));
+          return sendJson(response, 200, await store.deleteTrip(tripId, eventMode ? await readJson(request) : undefined));
         }
 
         if (request.method === "POST" && segments[3] === "drivers") {
@@ -239,8 +243,8 @@ export function createAppHandler({
       }
 
       if (request.method === "GET" || request.method === "HEAD") {
-        if (!experiment && url.pathname.startsWith("/week/")) throw new StoreError("Not found.", 404);
-        return await serveStatic(experiment && url.pathname === "/" ? "/week/index.html" : url.pathname, response);
+        if (!eventMode && url.pathname.startsWith("/week/")) throw new StoreError("Not found.", 404);
+        return await serveStatic(eventMode && ["/", "/index.html"].includes(url.pathname) ? "/week/index.html" : url.pathname, response);
       }
 
       throw new StoreError("Not found.", 404);
@@ -259,7 +263,23 @@ export function createAppServer(options = {}) {
   return createServer(createAppHandler(options));
 }
 
-export default createAppHandler();
+function deploymentHandler() {
+  if (!process.env.VERCEL) return createAppHandler();
+  const pin = process.env.TEMPLE_CARPOOL_ADMIN_PIN;
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!pin || pin === '2468' || !token) {
+    return (_request, response) => sendJson(response, 503, {error:'Temple Ride is waiting for its private storage or organizer settings.'});
+  }
+  if (process.env.VERCEL_ENV === 'production') {
+    return createAppHandler({adminPin:pin, hostedBackend:new ProductionEventBackend(productionBlobs())});
+  }
+  // Each hosted preview has separate state, even when Blob credentials are shared.
+  if (!process.env.VERCEL_URL) return (_request, response) => sendJson(response, 503, {error:'Preview storage is unavailable.'});
+  const hostedBackend = new BlobStateBackend({pathname:'temple-ride/previews/' + process.env.VERCEL_URL + '.json', token});
+  return createAppHandler({adminPin:pin, hostedBackend});
+}
+
+export default deploymentHandler();
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const port = Number(process.env.PORT) || 3000;

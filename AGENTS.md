@@ -84,3 +84,5 @@ PRD §14.11 adds role-first entry, day-specific Join Any Car, and a private week
 PRD §14.13 allows the organizer to show the whole week or one scheduled session to all members in the local experiment. Keep all rosters in the same week store. Scope member reads, writes and matching to the published view, retain the full PIN-protected organizer view, and invalidate stale forms after a switch.
 
 PRD §14.14 adds saved session and week events to the isolated experiment. New drafts, previews and history are organizer-only. Preserve the previous event atomically on activation, keep every member action scoped to the active event, and reject forms opened before an event switch or reactivation.
+
+PRD §15 authorizes the hosted event planner and the one-time copy of the live pilot trip into a Temple Session. Production uses separate private event storage. Keep the local experiment independent and preserve the original production roster.

@@ -1,3 +1,6 @@
+import { analytics } from '../analytics/index.js';
+import { mountPrivacyControl } from '../analytics/browser.js';
+
 const $ = (selector, root = document) => root.querySelector(selector);
 const view = $('#view');
 const dialog = $('#form-dialog');
@@ -77,7 +80,7 @@ async function refresh(force = false) {
     return refresh(true);
   }
   if (path !== statePath()) return;
-  if (result.version !== 4) throw new Error('Open Temple Week with the local experiment launcher.');
+  if (result.version !== 4) throw new Error('Reload the page to open the current event.');
   if (!force && interacting()) return;
   if (state.week && state.week.id !== result.week?.id && location.hash.startsWith('#session/')) {
     history.replaceState(null, '', '#week');
@@ -384,9 +387,15 @@ function reviewNames(error, allowCars = true) {
   });
 }
 async function saveWithReview(path, body, method = 'POST', allowCars = true) {
+  const signup = !previewId && method === 'POST' && ['/api/week/plans', '/api/week/availability'].includes(path);
+  if (signup) void analytics.track('signup_started');
   let data = { ...body };
   for (;;) {
-    try { return await api(path, { method, body: data }); }
+    try {
+      const result = await api(path, { method, body: data });
+      if (signup) void analytics.track('signup_completed');
+      return result;
+    }
     catch (error) {
       if (error.code !== 'NAME_MATCH_CONFIRMATION_REQUIRED') throw error;
       const choice = await reviewNames(error, allowCars);
@@ -1034,9 +1043,12 @@ if (previewId) {
 }
 api('/api/config').then(async settings => {
   config = settings;
-  if (settings.mode !== 'temple-week') throw new Error('Use the local Temple Week experiment launcher to open this experience.');
+  if (settings.mode !== 'temple-week') throw new Error('Reload the page to open the current event.');
   await refresh(true);
 }).catch((error) => {
   view.innerHTML = `<section class="week-empty"><h1>${previewId ? 'Preview unavailable' : 'Temple week could not load'}</h1>${previewId ? '<p><a class="text-button" href="/#admin">Open Admin to choose an event</a></p>' : ''}<p>${esc(error.message)}</p><button class="primary-button" id="retry-load">Try again</button></section>`;
   $('#retry-load').onclick = () => location.reload();
 });
+
+mountPrivacyControl($('#analytics-privacy'), analytics);
+if (!previewId) analytics.page();
